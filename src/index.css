@@ -1,0 +1,676 @@
+/* ============================================================
+   盆栽帖 — 苔と墨の和モダン
+   墨色の地に苔緑、朱の印章色をアクセントに、明朝体の見出し
+   ============================================================ */
+
+:root {
+  --ink: #12160e; /* 墨 × 苔の地色 */
+  --ink-2: #1b2214;
+  --ink-3: #242e1b;
+  --moss: #4a5c38;
+  --leaf: #93a878; /* 若葉 */
+  --paper: #ece4d2; /* 生成り */
+  --paper-dim: #b3ac9a;
+  --vermilion: #c2492f; /* 朱 */
+  --vermilion-dark: #9c3722;
+
+  --font-display: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --font-body: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
+    sans-serif;
+
+  --tabbar-height: calc(56px + env(safe-area-inset-bottom));
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: var(--paper);
+  overscroll-behavior-y: none;
+  /* 和紙のようなごく淡いむらを重ねる */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(147, 168, 120, 0.07), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(147, 168, 120, 0.05), transparent);
+  background-attachment: fixed;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select {
+  font-family: inherit;
+  font-size: 16px; /* iOS のフォーカス時自動ズームを防ぐ */
+  color: var(--paper);
+  background: var(--ink-3);
+  border: 1px solid var(--moss);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.app {
+  min-height: 100dvh;
+}
+
+.main {
+  padding-bottom: var(--tabbar-height);
+}
+
+.main--full {
+  padding-bottom: 0;
+}
+
+/* ---------- ページ共通 ---------- */
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(12px + env(safe-area-inset-top)) 16px 24px;
+}
+
+.page__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 0 18px;
+}
+
+.page__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  color: var(--paper);
+}
+
+.page__title::after {
+  /* 印章のような朱の点 */
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 10px;
+  background: var(--vermilion);
+  border-radius: 2px;
+  transform: rotate(8deg) translateY(-2px);
+}
+
+.page__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- ボタン ---------- */
+
+.btn {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: var(--ink-3);
+  border: 1px solid var(--moss);
+  color: var(--paper);
+  transition: transform 0.08s ease, background-color 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+}
+
+.btn--ghost {
+  background: rgba(18, 22, 14, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.btn--accent {
+  background: var(--vermilion);
+  border-color: var(--vermilion-dark);
+  color: #fff7ec;
+}
+
+.btn--danger {
+  background: transparent;
+  border-color: var(--vermilion-dark);
+  color: #e08a76;
+}
+
+/* ---------- 通知/バナー ---------- */
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notice--error {
+  background: rgba(194, 73, 47, 0.14);
+  border: 1px solid var(--vermilion-dark);
+  color: #eab0a1;
+}
+
+.notice--accent {
+  background: linear-gradient(120deg, var(--ink-3), rgba(74, 92, 56, 0.45));
+  border: 1px solid var(--moss);
+  animation: rise 0.4s ease both;
+}
+
+.notice--accent .btn {
+  flex-shrink: 0;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.empty {
+  text-align: center;
+  color: var(--paper-dim);
+  padding: 72px 0;
+  font-size: 15px;
+  line-height: 2;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- アルバム ---------- */
+
+.album-month {
+  margin-bottom: 26px;
+}
+
+.album-month__label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--leaf);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.album-month__label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--moss), transparent);
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.album-grid__cell {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 4px;
+  padding: 0;
+  background: var(--ink-2);
+}
+
+.album-grid__cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.album-grid__cell:active img {
+  transform: scale(1.04);
+}
+
+.album-grid__day {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- 撮影 FAB ---------- */
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--tabbar-height) + 18px);
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--vermilion);
+  color: #fff7ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.1s ease;
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* ---------- ビューア (写真/動画のモーダル) ---------- */
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 6, 0.92);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  animation: fade 0.18s ease both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.viewer__body {
+  width: min(94vw, 560px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.viewer__body img,
+.viewer__body video {
+  width: 100%;
+  max-height: 72dvh;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #000;
+}
+
+.viewer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.viewer__meta time {
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  font-size: 15px;
+  color: var(--paper-dim);
+}
+
+.viewer__buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- カメラ ---------- */
+
+.camera {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.camera__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera__onion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.camera__flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: flash 0.18s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes flash {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.camera__top {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.camera__error {
+  position: absolute;
+  top: 40%;
+  left: 24px;
+  right: 24px;
+  text-align: center;
+  color: var(--paper);
+  background: rgba(18, 22, 14, 0.8);
+  border-radius: 10px;
+  padding: 16px;
+  line-height: 1.7;
+}
+
+.camera__bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.camera__opacity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(18, 22, 14, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+.camera__opacity input {
+  width: 150px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--vermilion);
+}
+
+.camera__shutter {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: var(--vermilion);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.25);
+  transition: transform 0.08s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera__shutter:active {
+  transform: scale(0.9);
+}
+
+.camera__saving {
+  font-size: 10px;
+  color: #fff7ec;
+}
+
+/* ---------- タイムラプス ---------- */
+
+.video-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.video-card {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--ink-2), var(--ink-3));
+  border: 1px solid rgba(74, 92, 56, 0.55);
+  transition: transform 0.08s ease;
+}
+
+.video-card:active {
+  transform: scale(0.985);
+}
+
+.video-card__period {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.1em;
+  color: var(--paper);
+}
+
+.video-card__meta {
+  font-size: 12px;
+  color: var(--paper-dim);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- 作成シート ---------- */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 6, 0.75);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 30;
+  animation: fade 0.18s ease both;
+}
+
+.sheet__body {
+  width: min(100vw, 640px);
+  background: var(--ink-2);
+  border-radius: 18px 18px 0 0;
+  border-top: 1px solid var(--moss);
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: slide-up 0.25s ease both;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.sheet__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+
+.sheet__note {
+  font-size: 13px;
+  color: var(--paper-dim);
+}
+
+.sheet__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- フォーム ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--paper-dim);
+  letter-spacing: 0.05em;
+}
+
+.field--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--paper);
+  font-size: 15px;
+}
+
+.field--row small {
+  display: block;
+  color: var(--paper-dim);
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ---------- 進捗バー ---------- */
+
+.progress {
+  position: relative;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--ink-3);
+  border: 1px solid var(--moss);
+  overflow: hidden;
+}
+
+.progress__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--moss), var(--vermilion));
+  transition: width 0.2s ease;
+}
+
+.progress__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- 設定 ---------- */
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--ink-2);
+  border: 1px solid rgba(74, 92, 56, 0.55);
+  padding: 4px 16px;
+}
+
+.settings-group .field--row {
+  padding: 14px 0;
+}
+
+.settings-group .field--row + .field--row {
+  border-top: 1px solid rgba(74, 92, 56, 0.35);
+}
+
+.settings-note {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--paper-dim);
+}
+
+/* ---------- タブバー ---------- */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--tabbar-height);
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  background: rgba(18, 22, 14, 0.9);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(74, 92, 56, 0.5);
+  z-index: 20;
+}
+
+.tabbar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--paper-dim);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.tabbar__item.active {
+  color: var(--vermilion);
+}
