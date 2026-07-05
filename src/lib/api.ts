@@ -23,6 +23,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status?: number,
+    /** Cloudflare Access のログインが必要な可能性が高い失敗 */
+    public authLikely = false,
   ) {
     super(message);
   }
@@ -33,18 +35,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(path, init);
   } catch {
-    // Cloudflare Access のセッション切れは別ドメインへのリダイレクトになり
-    // fetch が失敗する。ページ再読み込みで再ログインさせる
+    // Cloudflare Access のセッションがないと別ドメインのログインページへ
+    // リダイレクトされ、fetch はクロスオリジンで失敗する
     throw new ApiError(
-      "通信に失敗しました。ログインセッションが切れている場合はページを再読み込みしてください",
+      "通信に失敗しました。ログインが必要かもしれません",
+      undefined,
+      true,
     );
   }
   const contentType = res.headers.get("Content-Type") ?? "";
   if (!contentType.includes("application/json")) {
-    throw new ApiError(
-      "セッションが切れました。ページを再読み込みしてください",
-      res.status,
-    );
+    // Access のログイン HTML が返ってきたケース
+    throw new ApiError("ログインセッションが切れています", res.status, true);
   }
   const body = (await res.json()) as T & { error?: string };
   if (!res.ok) {

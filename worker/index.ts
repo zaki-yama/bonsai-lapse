@@ -229,4 +229,13 @@ async function serveR2Object(
   });
 }
 
-export default app;
+const root = new Hono<{ Bindings: Bindings }>();
+
+// Cloudflare Access ログインの入口。Service Worker にキャッシュされた画面からは
+// Access のログインページへ遷移できないため、トップレベルでここを開かせて
+// 認証を通してからアプリに戻す
+root.get("/login", (c) => c.redirect("/"));
+
+root.route("/", app);
+
+export default root;

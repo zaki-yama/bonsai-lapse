@@ -32,8 +32,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // API とアップロード済みメディアは Service Worker を通さない
-        navigateFallbackDenylist: [/^\/api\//],
+        // API と Access ログイン入口は Service Worker を通さない
+        navigateFallbackDenylist: [/^\/api\//, /^\/login/],
       },
     }),
   ],

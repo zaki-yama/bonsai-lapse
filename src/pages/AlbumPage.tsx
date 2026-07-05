@@ -3,13 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, type Photo, type Status } from "../lib/api";
 import { normalizeToJpeg } from "../lib/image";
 import { loadSettings } from "../lib/settings";
+import ErrorNotice from "../components/ErrorNotice";
 
 export default function AlbumPage() {
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [selected, setSelected] = useState<Photo | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -19,7 +20,7 @@ export default function AlbumPage() {
       setPhotos(photoList);
       setStatus(s);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
     }
   }, []);
 
@@ -40,7 +41,7 @@ export default function AlbumPage() {
       }
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -54,7 +55,7 @@ export default function AlbumPage() {
       setSelected(null);
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
     }
   };
 
@@ -89,7 +90,7 @@ export default function AlbumPage() {
         </div>
       </header>
 
-      {error && <p className="notice notice--error">{error}</p>}
+      <ErrorNotice error={error} />
 
       {showAutoGenBanner && (
         <div className="notice notice--accent">

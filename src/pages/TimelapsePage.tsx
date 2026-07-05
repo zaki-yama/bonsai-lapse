@@ -4,11 +4,12 @@ import { api, type Photo, type Video } from "../lib/api";
 import { generateTimelapse, type TimelapseProgress } from "../lib/timelapse";
 import { loadSettings } from "../lib/settings";
 import { formatDate } from "./AlbumPage";
+import ErrorNotice from "../components/ErrorNotice";
 
 export default function TimelapsePage() {
   const [videos, setVideos] = useState<Video[] | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [creating, setCreating] = useState(false);
@@ -31,7 +32,7 @@ export default function TimelapsePage() {
       setPhotos(photoList);
       return photoList;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
       return [];
     }
   }, []);
@@ -88,7 +89,7 @@ export default function TimelapsePage() {
       setCreating(false);
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
     } finally {
       setProgress(null);
     }
@@ -119,7 +120,7 @@ export default function TimelapsePage() {
     } catch (e) {
       // ユーザーが共有シートを閉じただけの場合は無視
       if (!(e instanceof DOMException && e.name === "AbortError")) {
-        setError(e instanceof Error ? e.message : String(e));
+        setError(e);
       }
     } finally {
       setSharing(false);
@@ -133,7 +134,7 @@ export default function TimelapsePage() {
       setPlaying(null);
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(e);
     }
   };
 
@@ -151,7 +152,7 @@ export default function TimelapsePage() {
         </div>
       </header>
 
-      {error && <p className="notice notice--error">{error}</p>}
+      <ErrorNotice error={error} />
 
       {videos === null ? (
         <p className="empty">読み込み中…</p>
