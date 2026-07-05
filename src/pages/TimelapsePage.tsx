@@ -140,7 +140,7 @@ export default function TimelapsePage() {
   return (
     <div className="page">
       <header className="page__header">
-        <h1 className="page__title">タイムラプス</h1>
+        <h1 className="page__title">Timelapse</h1>
         <div className="page__actions">
           <button
             className="btn btn--accent"

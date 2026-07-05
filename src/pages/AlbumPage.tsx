@@ -69,7 +69,7 @@ export default function AlbumPage() {
   return (
     <div className="page">
       <header className="page__header">
-        <h1 className="page__title">盆栽帖</h1>
+        <h1 className="page__title">Bonsai Lapse</h1>
         <div className="page__actions">
           <button
             className="btn btn--ghost"
@@ -173,7 +173,7 @@ function groupByMonth(photos: Photo[]): Array<[string, Photo[]]> {
   const map = new Map<string, Photo[]>();
   for (const photo of photos) {
     const d = new Date(photo.takenAt);
-    const key = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+    const key = `${d.toLocaleString("en-US", { month: "long" })} ${d.getFullYear()}`;
     const list = map.get(key) ?? [];
     list.push(photo);
     map.set(key, list);

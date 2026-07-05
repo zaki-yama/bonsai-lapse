@@ -15,6 +15,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply bonsai-lapse-db --remote"
   },
   "dependencies": {
+    "@fontsource-variable/outfit": "^5.2.8",
     "hono": "^4.12.27",
     "mediabunny": "^1.50.6",
     "react": "^19.2.7",

@@ -13,7 +13,7 @@ export default function SettingsPage() {
   return (
     <div className="page">
       <header className="page__header">
-        <h1 className="page__title">設定</h1>
+        <h1 className="page__title">Settings</h1>
       </header>
 
       <section className="settings-group">

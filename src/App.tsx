@@ -22,15 +22,15 @@ export default function App() {
         <nav className="tabbar">
           <NavLink to="/" end className="tabbar__item">
             <TreeIcon />
-            <span>アルバム</span>
+            <span>Album</span>
           </NavLink>
           <NavLink to="/timelapse" className="tabbar__item">
             <FilmIcon />
-            <span>タイムラプス</span>
+            <span>Timelapse</span>
           </NavLink>
           <NavLink to="/settings" className="tabbar__item">
             <GearIcon />
-            <span>設定</span>
+            <span>Settings</span>
           </NavLink>
         </nav>
       )}
