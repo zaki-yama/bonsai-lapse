@@ -1,31 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- 地: 墨×苔 -->
-  <rect width="512" height="512" fill="#12160e"/>
-  <radialGradient id="glow" cx="0.5" cy="0.35" r="0.7">
-    <stop offset="0" stop-color="#2c3a24"/>
-    <stop offset="1" stop-color="#12160e"/>
-  </radialGradient>
-  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- エメラルドの地に白のミニマルな盆栽グリフ -->
+  <rect width="512" height="512" fill="#0ea36c"/>
+
+  <!-- 葉 -->
+  <circle cx="256" cy="184" r="92" fill="#ffffff"/>
+  <circle cx="168" cy="228" r="52" fill="#ffffff" opacity="0.85"/>
+  <circle cx="346" cy="222" r="58" fill="#ffffff" opacity="0.85"/>
 
   <!-- 幹 -->
-  <path d="M248 380 C244 330 236 300 200 272 C176 254 168 234 176 212
-           L204 220 C210 238 224 252 248 268 C252 244 250 224 240 200
-           L272 192 C284 224 284 256 276 288 C300 276 314 260 320 238
-           L348 248 C340 286 312 314 276 330 C268 348 264 362 264 380 Z"
-        fill="#7a5a38"/>
+  <path d="M244 368 C244 320 236 296 214 272 L240 258 C252 274 258 290 262 308
+           C268 288 280 272 298 260 L318 278 C292 296 272 322 270 368 Z"
+        fill="#ffffff"/>
 
-  <!-- 葉むら -->
-  <ellipse cx="196" cy="196" rx="88" ry="56" fill="#4a5c38"/>
-  <ellipse cx="318" cy="216" rx="76" ry="48" fill="#4a5c38"/>
-  <ellipse cx="256" cy="150" rx="96" ry="58" fill="#93a878"/>
-  <ellipse cx="176" cy="176" rx="60" ry="38" fill="#7d9260"/>
-  <ellipse cx="330" cy="186" rx="56" ry="34" fill="#7d9260"/>
-
-  <!-- 鉢: 朱 -->
-  <path d="M158 380 L354 380 L342 436 Q339 448 326 448 L186 448 Q173 448 170 436 Z"
-        fill="#c2492f"/>
-  <rect x="146" y="368" width="220" height="18" rx="6" fill="#9c3722"/>
-
-  <!-- 受け皿の影 -->
-  <ellipse cx="256" cy="456" rx="120" ry="10" fill="#000" opacity="0.35"/>
+  <!-- 鉢 -->
+  <path d="M172 376 L340 376 L328 428 Q325 440 312 440 L200 440 Q187 440 184 428 Z"
+        fill="#ffffff"/>
 </svg>
