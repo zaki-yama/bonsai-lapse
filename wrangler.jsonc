@@ -11,8 +11,7 @@
     {
       "binding": "DB",
       "database_name": "bonsai-lapse-db",
-      // デプロイ前に `wrangler d1 create bonsai-lapse-db` で作成し、表示された ID に置き換える
-      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID",
+      "database_id": "601f0225-812b-4dd0-bebb-7f31bb2529e7",
       "migrations_dir": "migrations"
     }
   ],
