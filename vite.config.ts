@@ -9,7 +9,7 @@ export default defineConfig({
     cloudflare(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["apple-touch-icon.png"],
+      includeAssets: ["apple-touch-icon-180x180.png", "favicon.ico"],
       manifest: {
         name: "Bonsai Lapse",
         short_name: "BonsaiLapse",
@@ -20,8 +20,15 @@ export default defineConfig({
         background_color: "#1a2416",
         theme_color: "#1a2416",
         icons: [
-          { src: "pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "pwa-512.png", sizes: "512x512", type: "image/png" },
+          { src: "pwa-64x64.png", sizes: "64x64", type: "image/png" },
+          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
         ],
       },
       workbox: {
