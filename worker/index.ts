@@ -41,7 +41,8 @@ app.get("/photos", async (c) => {
 
 app.post("/photos", async (c) => {
   const form = await c.req.formData();
-  const file = form.get("file");
+  // workers-types の FormData.get は string | null 固定だが、実行時は File が返る
+  const file = form.get("file") as unknown;
   const takenAt = form.get("takenAt");
   if (!(file instanceof File) || typeof takenAt !== "string" || !takenAt) {
     return c.json({ error: "file と takenAt が必要です" }, 400);
@@ -102,7 +103,7 @@ app.get("/videos", async (c) => {
 
 app.post("/videos", async (c) => {
   const form = await c.req.formData();
-  const file = form.get("file");
+  const file = form.get("file") as unknown;
   const fromTakenAt = form.get("fromTakenAt");
   const toTakenAt = form.get("toTakenAt");
   const photoCount = Number(form.get("photoCount"));
