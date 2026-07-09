@@ -176,6 +176,15 @@ export default function TimelapsePage() {
           {videos.map((video) => (
             <li key={video.id}>
               <button className="video-card" onClick={() => setPlaying(video)}>
+                <span className="video-card__thumb">
+                  {/* #t=0.1 で先頭フレームを描画させる (iOS Safari 対策) */}
+                  <video
+                    src={`${video.videoUrl}#t=0.1`}
+                    preload="metadata"
+                    muted
+                    playsInline
+                  />
+                </span>
                 <span className="video-card__period">
                   {formatDate(video.fromTakenAt)} — {formatDate(video.toTakenAt)}
                 </span>

@@ -293,6 +293,7 @@ select:focus {
   padding: 3px 7px;
   backdrop-filter: blur(4px);
 }
+
 /* ---------- 撮影 FAB ---------- */
 
 .fab {
@@ -418,6 +419,7 @@ select:focus {
   height: 17px;
   accent-color: var(--accent);
 }
+
 /* ---------- カメラ (この画面のみダーク) ---------- */
 
 .camera {
@@ -584,17 +586,38 @@ select:focus {
   transform: scale(0.985);
 }
 
-.video-card::before {
-  /* 再生アイコン */
-  content: "";
+.video-card__thumb {
+  position: relative;
   grid-column: 1;
   grid-row: 1 / 3;
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--accent-soft);
+}
+
+.video-card__thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.video-card__thumb::after {
+  /* 再生アイコン */
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: var(--accent-soft)
+  background: rgba(255, 255, 255, 0.88)
     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 6.5v11l9-5.5z" fill="%230ea36c"/></svg>')
-    center / 22px no-repeat;
+    center / 16px no-repeat;
+  backdrop-filter: blur(2px);
 }
 
 .video-card::after {
