@@ -10,6 +10,7 @@ type PhotoRow = {
   taken_at: string;
   r2_key: string;
   created_at: string;
+  excluded: number;
 };
 
 type VideoRow = {
@@ -27,13 +28,14 @@ const app = new Hono<{ Bindings: Bindings }>().basePath("/api");
 
 app.get("/photos", async (c) => {
   const { results } = await c.env.DB.prepare(
-    "SELECT id, taken_at, created_at FROM photos ORDER BY taken_at DESC",
+    "SELECT id, taken_at, created_at, excluded FROM photos ORDER BY taken_at DESC",
   ).all<PhotoRow>();
   return c.json({
     photos: results.map((r) => ({
       id: r.id,
       takenAt: r.taken_at,
       createdAt: r.created_at,
+      excluded: r.excluded === 1,
       imageUrl: `/api/photos/${r.id}/image`,
     })),
   });
@@ -69,6 +71,22 @@ app.get("/photos/:id/image", async (c) => {
     .first<Pick<PhotoRow, "r2_key">>();
   if (!row) return c.json({ error: "not found" }, 404);
   return serveR2Object(c.env.BUCKET, row.r2_key, c.req.raw, "image/jpeg");
+});
+
+app.patch("/photos/:id", async (c) => {
+  const body = await c.req
+    .json<{ excluded?: unknown }>()
+    .catch(() => null);
+  if (!body || typeof body.excluded !== "boolean") {
+    return c.json({ error: "excluded (boolean) が必要です" }, 400);
+  }
+  const result = await c.env.DB.prepare(
+    "UPDATE photos SET excluded = ? WHERE id = ?",
+  )
+    .bind(body.excluded ? 1 : 0, c.req.param("id"))
+    .run();
+  if (result.meta.changes === 0) return c.json({ error: "not found" }, 404);
+  return c.json({ ok: true });
 });
 
 app.delete("/photos/:id", async (c) => {
@@ -155,17 +173,19 @@ app.delete("/videos/:id", async (c) => {
 // ---- status(自動生成トリガー判定用)----
 
 app.get("/status", async (c) => {
+  // 対象外 (excluded) の写真はタイムラプスに使わないので数えない
   const photoCount =
     (
-      await c.env.DB.prepare("SELECT COUNT(*) AS n FROM photos").first<{
-        n: number;
-      }>()
+      await c.env.DB.prepare(
+        "SELECT COUNT(*) AS n FROM photos WHERE excluded = 0",
+      ).first<{ n: number }>()
     )?.n ?? 0;
   const newPhotos =
     (
       await c.env.DB.prepare(
         `SELECT COUNT(*) AS n FROM photos
-         WHERE created_at > COALESCE((SELECT MAX(created_at) FROM videos), '')`,
+         WHERE excluded = 0
+           AND created_at > COALESCE((SELECT MAX(created_at) FROM videos), '')`,
       ).first<{ n: number }>()
     )?.n ?? 0;
   return c.json({ photoCount, newPhotosSinceLastVideo: newPhotos });

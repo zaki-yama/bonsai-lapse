@@ -59,6 +59,22 @@ export default function AlbumPage() {
     }
   };
 
+  const toggleExcluded = async (photo: Photo) => {
+    const excluded = !photo.excluded;
+    try {
+      await api.setPhotoExcluded(photo.id, excluded);
+      const updated = { ...photo, excluded };
+      setPhotos((list) =>
+        list ? list.map((p) => (p.id === photo.id ? updated : p)) : list,
+      );
+      setSelected((s) => (s?.id === photo.id ? updated : s));
+      // 自動生成バナーの枚数も変わるので裏で更新する
+      api.status().then(setStatus, () => {});
+    } catch (e) {
+      setError(e);
+    }
+  };
+
   // ビューアの前後移動(photos は撮影日の新しい順 = グリッドの表示順)
   const selectedIndex =
     selected && photos ? photos.findIndex((p) => p.id === selected.id) : -1;
@@ -148,13 +164,18 @@ export default function AlbumPage() {
               {items.map((photo) => (
                 <button
                   key={photo.id}
-                  className="album-grid__cell"
+                  className={`album-grid__cell${
+                    photo.excluded ? " album-grid__cell--excluded" : ""
+                  }`}
                   onClick={() => setSelected(photo)}
                 >
                   <img src={photo.imageUrl} alt="" loading="lazy" />
                   <span className="album-grid__day">
                     {new Date(photo.takenAt).getDate()}
                   </span>
+                  {photo.excluded && (
+                    <span className="album-grid__excluded">除外</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -204,6 +225,14 @@ export default function AlbumPage() {
                   </span>
                 )}
               </div>
+              <label className="viewer__include">
+                <input
+                  type="checkbox"
+                  checked={!selected.excluded}
+                  onChange={() => void toggleExcluded(selected)}
+                />
+                タイムラプスに使う
+              </label>
               <div className="viewer__buttons">
                 <button
                   className="btn btn--danger"

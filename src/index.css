@@ -274,6 +274,25 @@ select:focus {
   padding: 3px 8px;
   backdrop-filter: blur(4px);
 }
+
+/* タイムラプス対象外の写真は薄く表示する */
+.album-grid__cell--excluded img {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+
+.album-grid__excluded {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  padding: 3px 7px;
+  backdrop-filter: blur(4px);
+}
 /* ---------- 撮影 FAB ---------- */
 
 .fab {
@@ -382,6 +401,22 @@ select:focus {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
+}
+
+.viewer__include {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  user-select: none;
+}
+
+.viewer__include input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
 }
 /* ---------- カメラ (この画面のみダーク) ---------- */
 

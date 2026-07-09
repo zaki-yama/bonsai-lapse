@@ -49,11 +49,12 @@ export default function TimelapsePage() {
   }, []);
 
   const openCreatePanel = (photoList: Photo[]) => {
-    if (photoList.length < 2) {
-      setError("タイムラプスには写真が 2 枚以上必要です");
+    const included = photoList.filter((p) => !p.excluded);
+    if (included.length < 2) {
+      setError("タイムラプスには対象の写真が 2 枚以上必要です");
       return;
     }
-    const sorted = [...photoList].sort((a, b) =>
+    const sorted = [...included].sort((a, b) =>
       a.takenAt.localeCompare(b.takenAt),
     );
     setFrom(toDateInput(sorted[0].takenAt));
@@ -62,14 +63,23 @@ export default function TimelapsePage() {
     setCreating(true);
   };
 
+  // 期間内かつタイムラプス対象(excluded でない)の写真
   const targetPhotos = useMemo(() => {
     if (!from || !to) return [];
     return photos
       .filter((p) => {
         const day = toDateInput(p.takenAt);
-        return from <= day && day <= to;
+        return !p.excluded && from <= day && day <= to;
       })
       .sort((a, b) => a.takenAt.localeCompare(b.takenAt));
+  }, [photos, from, to]);
+
+  const excludedInRange = useMemo(() => {
+    if (!from || !to) return 0;
+    return photos.filter((p) => {
+      const day = toDateInput(p.takenAt);
+      return p.excluded && from <= day && day <= to;
+    }).length;
   }, [photos, from, to]);
 
   const generate = async () => {
@@ -212,7 +222,10 @@ export default function TimelapsePage() {
                 <option value={0.5}>ゆっくり (0.5秒/枚)</option>
               </select>
             </label>
-            <p className="sheet__note">対象: {targetPhotos.length} 枚</p>
+            <p className="sheet__note">
+              対象: {targetPhotos.length} 枚
+              {excludedInRange > 0 && ` (対象外 ${excludedInRange} 枚を除く)`}
+            </p>
             {progress ? (
               <div className="progress">
                 <div

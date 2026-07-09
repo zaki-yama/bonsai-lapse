@@ -2,6 +2,8 @@ export type Photo = {
   id: string;
   takenAt: string;
   createdAt: string;
+  /** true ならタイムラプスの対象外 */
+  excluded: boolean;
   imageUrl: string;
 };
 
@@ -70,6 +72,14 @@ export const api = {
 
   async deletePhoto(id: string): Promise<void> {
     await request(`/api/photos/${id}`, { method: "DELETE" });
+  },
+
+  async setPhotoExcluded(id: string, excluded: boolean): Promise<void> {
+    await request(`/api/photos/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ excluded }),
+    });
   },
 
   async listVideos(): Promise<Video[]> {
