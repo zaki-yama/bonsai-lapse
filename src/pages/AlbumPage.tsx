@@ -59,6 +59,32 @@ export default function AlbumPage() {
     }
   };
 
+  // ビューアの前後移動(photos は撮影日の新しい順 = グリッドの表示順)
+  const selectedIndex =
+    selected && photos ? photos.findIndex((p) => p.id === selected.id) : -1;
+
+  const showNeighbor = useCallback(
+    (dir: 1 | -1) => {
+      if (!photos || selectedIndex < 0) return;
+      const next = photos[selectedIndex + dir];
+      if (next) setSelected(next);
+    },
+    [photos, selectedIndex],
+  );
+
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") showNeighbor(-1);
+      if (e.key === "ArrowRight") showNeighbor(1);
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, showNeighbor]);
+
   const threshold = loadSettings().autoGenThreshold;
   const showAutoGenBanner =
     status !== null &&
@@ -147,10 +173,37 @@ export default function AlbumPage() {
 
       {selected && (
         <div className="viewer" onClick={() => setSelected(null)}>
-          <div className="viewer__body" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="viewer__body"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => {
+              touchStart.current = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY,
+              };
+            }}
+            onTouchEnd={(e) => {
+              const start = touchStart.current;
+              touchStart.current = null;
+              if (!start) return;
+              const dx = e.changedTouches[0].clientX - start.x;
+              const dy = e.changedTouches[0].clientY - start.y;
+              // 横方向のスワイプだけ拾う(縦スクロールと区別する)
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                showNeighbor(dx < 0 ? 1 : -1);
+              }
+            }}
+          >
             <img src={selected.imageUrl} alt="" />
             <div className="viewer__meta">
-              <time>{formatDate(selected.takenAt)}</time>
+              <div className="viewer__info">
+                <time>{formatDate(selected.takenAt)}</time>
+                {photos && (
+                  <span className="viewer__count">
+                    {selectedIndex + 1} / {photos.length}
+                  </span>
+                )}
+              </div>
               <div className="viewer__buttons">
                 <button
                   className="btn btn--danger"

@@ -274,7 +274,6 @@ select:focus {
   padding: 3px 8px;
   backdrop-filter: blur(4px);
 }
-
 /* ---------- 撮影 FAB ---------- */
 
 .fab {
@@ -373,6 +372,17 @@ select:focus {
   gap: 8px;
 }
 
+.viewer__info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.viewer__count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
 /* ---------- カメラ (この画面のみダーク) ---------- */
 
 .camera {
