@@ -43,7 +43,9 @@ export default function CameraPage() {
     (async () => {
       try {
         const photos = await api.listPhotos();
-        if (!cancelled && photos.length > 0) setLastPhoto(photos[0]);
+        // タイムラプス対象外(excluded)の写真は重ね合わせに使わない
+        const latest = photos.find((p) => !p.excluded);
+        if (!cancelled && latest) setLastPhoto(latest);
       } catch {
         // オニオンスキンが出ないだけなので握りつぶす
       }
