@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, type Photo, type Status } from "../lib/api";
 import { normalizeToJpeg } from "../lib/image";
@@ -78,6 +84,12 @@ export default function AlbumPage() {
   // ビューアの前後移動(photos は撮影日の新しい順 = グリッドの表示順)
   const selectedIndex =
     selected && photos ? photos.findIndex((p) => p.id === selected.id) : -1;
+  const prevPhoto =
+    photos && selectedIndex > 0 ? photos[selectedIndex - 1] : null;
+  const nextPhoto =
+    photos && selectedIndex >= 0 && selectedIndex < photos.length - 1
+      ? photos[selectedIndex + 1]
+      : null;
 
   const showNeighbor = useCallback(
     (dir: 1 | -1) => {
@@ -88,18 +100,63 @@ export default function AlbumPage() {
     [photos, selectedIndex],
   );
 
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stageWidth, setStageWidth] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+  const pendingDir = useRef<1 | -1 | null>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  const openViewer = (photo: Photo) => {
+    setSelected(photo);
+    setDragOffset(0);
+    setTransitioning(false);
+    pendingDir.current = null;
+  };
+
+  useLayoutEffect(() => {
+    if (!selected) return;
+    const measure = () => setStageWidth(stageRef.current?.offsetWidth ?? 0);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [selected]);
+
+  // iPhone の写真アプリのようにスワイプ方向へスライドさせてから前後の写真へ切り替える
+  const commitSwipe = (dir: 1 | -1) => {
+    if (transitioning) return;
+    if (dir === 1 && !nextPhoto) return;
+    if (dir === -1 && !prevPhoto) return;
+    pendingDir.current = dir;
+    setDragOffset(dir === 1 ? -stageWidth : stageWidth);
+    setTransitioning(true);
+  };
+
+  const cancelSwipe = () => {
+    pendingDir.current = null;
+    setDragOffset(0);
+    setTransitioning(true);
+  };
+
+  const onTrackTransitionEnd = () => {
+    const dir = pendingDir.current;
+    pendingDir.current = null;
+    if (dir) showNeighbor(dir);
+    setDragOffset(0);
+    setTransitioning(false);
+  };
 
   useEffect(() => {
     if (!selected) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") showNeighbor(-1);
-      if (e.key === "ArrowRight") showNeighbor(1);
+      if (e.key === "ArrowLeft") commitSwipe(-1);
+      if (e.key === "ArrowRight") commitSwipe(1);
       if (e.key === "Escape") setSelected(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selected, showNeighbor]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, prevPhoto, nextPhoto, transitioning, stageWidth]);
 
   const threshold = loadSettings().autoGenThreshold;
   const showAutoGenBanner =
@@ -167,7 +224,7 @@ export default function AlbumPage() {
                   className={`album-grid__cell${
                     photo.excluded ? " album-grid__cell--excluded" : ""
                   }`}
-                  onClick={() => setSelected(photo)}
+                  onClick={() => openViewer(photo)}
                 >
                   <img src={photo.imageUrl} alt="" loading="lazy" />
                   <span className="album-grid__day">
@@ -194,28 +251,88 @@ export default function AlbumPage() {
 
       {selected && (
         <div className="viewer" onClick={() => setSelected(null)}>
-          <div
-            className="viewer__body"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => {
-              touchStart.current = {
-                x: e.touches[0].clientX,
-                y: e.touches[0].clientY,
-              };
-            }}
-            onTouchEnd={(e) => {
-              const start = touchStart.current;
-              touchStart.current = null;
-              if (!start) return;
-              const dx = e.changedTouches[0].clientX - start.x;
-              const dy = e.changedTouches[0].clientY - start.y;
-              // 横方向のスワイプだけ拾う(縦スクロールと区別する)
-              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-                showNeighbor(dx < 0 ? 1 : -1);
-              }
-            }}
-          >
-            <img src={selected.imageUrl} alt="" />
+          <div className="viewer__body" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="viewer__frame"
+              onTouchStart={(e) => {
+                if (transitioning) return;
+                touchStart.current = {
+                  x: e.touches[0].clientX,
+                  y: e.touches[0].clientY,
+                };
+              }}
+              onTouchMove={(e) => {
+                const start = touchStart.current;
+                if (!start) return;
+                const dx = e.touches[0].clientX - start.x;
+                const dy = e.touches[0].clientY - start.y;
+                // 縦方向の動きが優勢なら無視する(スクロール操作と区別する)
+                if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                const atEdge =
+                  (dx > 0 && !prevPhoto) || (dx < 0 && !nextPhoto);
+                setDragOffset(atEdge ? dx / 3 : dx);
+              }}
+              onTouchEnd={(e) => {
+                const start = touchStart.current;
+                touchStart.current = null;
+                if (!start) return;
+                const dx = e.changedTouches[0].clientX - start.x;
+                const dy = e.changedTouches[0].clientY - start.y;
+                // 横方向のスワイプだけ拾う(縦スクロールと区別する)
+                if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                  if (dx < 0 && nextPhoto) {
+                    commitSwipe(1);
+                    return;
+                  }
+                  if (dx > 0 && prevPhoto) {
+                    commitSwipe(-1);
+                    return;
+                  }
+                }
+                cancelSwipe();
+              }}
+            >
+              <div className="viewer__stage" ref={stageRef}>
+                <div
+                  className="viewer__track"
+                  onTransitionEnd={onTrackTransitionEnd}
+                  style={{
+                    transform: `translateX(${-stageWidth + dragOffset}px)`,
+                    transition: transitioning
+                      ? "transform 260ms cubic-bezier(0.2, 0.7, 0.3, 1)"
+                      : "none",
+                  }}
+                >
+                  <div className="viewer__slide">
+                    {prevPhoto && <img src={prevPhoto.imageUrl} alt="" />}
+                  </div>
+                  <div className="viewer__slide">
+                    <img src={selected.imageUrl} alt="" />
+                  </div>
+                  <div className="viewer__slide">
+                    {nextPhoto && <img src={nextPhoto.imageUrl} alt="" />}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="viewer__nav viewer__nav--prev"
+                onClick={() => commitSwipe(-1)}
+                disabled={!prevPhoto}
+                aria-label="前の写真"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="viewer__nav viewer__nav--next"
+                onClick={() => commitSwipe(1)}
+                disabled={!nextPhoto}
+                aria-label="次の写真"
+              >
+                ›
+              </button>
+            </div>
             <div className="viewer__meta">
               <div className="viewer__info">
                 <time>{formatDate(selected.takenAt)}</time>
